@@ -1,0 +1,53 @@
+
+<!DOCTYPE html>
+
+</html>
+<head>
+    <title>Threat Dashboard</title>
+</head>
+<body>
+    
+    <h1 id="title">Cyber Threat Monitor</h1>
+    <p id="status">Status: Scanning...</p>
+    <button id="scanBtn">Run Scan</button>
+    <div id="results"></div>
+ 
+    
+ <script>   
+
+// Grab elements from the page
+
+const title = document.getElementById('title');
+const status = document.getElementById('status');
+const scanBtn = document.getElementById('scanBtn');
+const results = document.getElementById('results');
+
+// change text directly
+status.textContent = 'Status: Ready';
+
+// Respond to a button click
+scanBtn.addEventListener('click', function() {
+
+    //your threat data
+    const threats = [
+        {id: 'CVE-2024-001', score: 9.8, vendor: "Fortinet"},
+        {id: 'CVE-2024-002', score: 7.3, vendor: "CISCO"},
+        {id: 'CVE-2024-002', score: 4.1, vendor: "Palo Alto"},
+
+    ];
+
+    // Build HTML string from your data
+    const html = threats
+    .filter(t => t.score >= 7.0)
+    .map(t => `<p>${t.id} - ${t.vendor} - Score: ${t.score}</p>`)
+    .join(``);
+
+    //Inject it into the page
+    results.innerHTML = html;
+    status.textContent = 'Status: Scan complete';
+});
+</script>
+
+</body>
+</html>
+
