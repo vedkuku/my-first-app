@@ -84,6 +84,10 @@ export default function home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null >(null);
 
+  // activeFilter — tracks which severity button is selected
+// 'all' means show everything
+const [activeFilter, setActiveFilter] = useState<string>('all');
+
   //useEffect - runs fetch everytime searchterm changes
   //[searchTerm] in dependency arragy = re-run when searchTerm changes
   // Replace the useEffect with this debounced version
@@ -122,48 +126,77 @@ useEffect(() => {
 
 }, [searchTerm]);
 
-  return (
-    <main style={{ padding: '40px', background: '#07090F', minHeight: '100vh' }}>
+// filteredThreats — derived from threats based on activeFilter
+// no API call needed — just filters already-fetched data
+const filteredThreats = activeFilter === 'all'
+  ? threats
+  : threats.filter(t => t.severity === activeFilter);
 
-      {/* Header */}
-      <h1 style={{ color: '#E8EDF5', marginBottom: '8px' }}>
-        Threat Dashboard
-      </h1>
+return (
+  <main style={{ padding: '40px', background: '#07090F', minHeight: '100vh' }}>
 
-      {/* Search box — updates searchTerm state on every keystroke */}
-      <input
-        type="text"
-        value={searchTerm}
-        onChange={e => setSearchTerm(e.target.value)}
-        placeholder="Search CVEs e.g. fortinet, cisco, apache..."
-        style={{
-          width: '100%',
-          padding: '10px 16px',
-          background: '#0E1117',
-          border: '1px solid #1E2636',
-          borderRadius: '10px',
-          color: '#E8EDF5',
-          fontSize: '14px',
-          marginBottom: '16px',
-          outline: 'none',
-        }}
-      />
+    {/* Header */}
+    <h1 style={{ color: '#E8EDF5', marginBottom: '8px' }}>
+      Threat Dashboard
+    </h1>
 
-      {/* Status line — shows count or loading or error */}
-      <p style={{ color: '#7B8BA5', marginBottom: '24px', fontSize: '13px' }}>
-        {loading && 'Fetching from NVD...'}
-        {error && `Error: ${error}`}
-        {!loading && !error && `${threats.length} threats found for "${searchTerm}"`}
-      </p>
+    {/* Search box — updates searchTerm on every keystroke */}
+    <input
+      type="text"
+      value={searchTerm}
+      onChange={e => setSearchTerm(e.target.value)}
+      placeholder="Search CVEs e.g. fortinet, cisco, apache..."
+      style={{
+        width: '100%',
+        padding: '10px 16px',
+        background: '#0E1117',
+        border: '1px solid #1E2636',
+        borderRadius: '10px',
+        color: '#E8EDF5',
+        fontSize: '14px',
+        marginBottom: '16px',
+        outline: 'none',
+      }}
+    />
 
-      {/* Threat cards — one per CVE */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {threats.map(t => (
-          <ThreatCard key={t.id} cveData={t} />
-        ))}
-      </div>
+    {/* Filter buttons — each sets activeFilter state on click */}
+    <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+      {['all', 'critical', 'high', 'medium', 'low'].map(t => (
+        <button
+          key={t}
+          onClick={() => setActiveFilter(t)}
+          style={{
+            padding: '6px 14px',
+            borderRadius: '8px',
+            border: `1px solid ${activeFilter === t ? '#6366F1' : '#1E2636'}`,
+            background: activeFilter === t ? '#6366F122' : 'none',
+            color: activeFilter === t ? '#818CF8' : '#7B8BA5',
+            cursor: 'pointer',
+            fontSize: '12px',
+            fontWeight: 600,
+            textTransform: 'capitalize',
+          }}
+        >
+          {t}
+        </button>
+      ))}
+    </div>
 
-    </main>
-      );
+    {/* Status line */}
+    <p style={{ color: '#7B8BA5', marginBottom: '24px', fontSize: '13px' }}>
+      {loading && 'Fetching from NVD...'}
+      {error && `Error: ${error}`}
+      {!loading && !error && `${filteredThreats.length} of ${threats.length} threats shown`}
+    </p>
+
+    {/* Threat cards — uses filteredThreats not threats */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      {filteredThreats.map(t => (
+        <ThreatCard key={t.id} cveData={t} />
+      ))}
+    </div>
+
+  </main>
+);
     }
  
