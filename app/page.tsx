@@ -136,7 +136,7 @@ return (
   <main style={{ padding: '40px', background: '#07090F', minHeight: '100vh' }}>
 
     {/* Header */}
-    <h1 style={{ color: '#E8EDF5', marginBottom: '8px' }}>
+    <h1 className="text-3xl font-bold text-white mb-2">
       Threat Dashboard
     </h1>
 
