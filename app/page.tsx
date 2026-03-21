@@ -103,7 +103,7 @@ useEffect(() => {
 
       try {
         const response = await fetch(
-          `https://services.nvd.nist.gov/rest/json/cves/2.0?keywordSearch=${searchTerm}&resultsPerPage=10`
+          `/api/threats?keyword=${searchTerm}`
         );
         if (!response.ok) throw new Error(`API error: ${response.status}`);
 
