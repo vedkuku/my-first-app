@@ -63,14 +63,6 @@ const getSeverity = (score: number, baseSeverity: string): Threat['severity'] =>
     .filter(Boolean) as Threat[];
 }
 
-         
-
-    
-
-
- 
-
-
 export default function home() {
   //searchTerm - what user typed in search box
 

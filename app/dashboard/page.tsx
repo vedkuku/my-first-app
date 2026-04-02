@@ -13,8 +13,19 @@ async function getThreats(keyword: string) {
   return data.vulnerabilities || [];
 }
 
+// Fetches CVEs saved by the user from our database
+async function getSavedThreats() {
+  const response = await fetch(`http://localhost:3000/api/saved-threats`, {
+    cache: 'no-store', //always fetch fresh - dont cache savd threats
+
+  });
+  const data = await response.json();
+  return data;
+}
+
 export default async function Dashboard() {
   const vulnerabilities = await getThreats('fortinet');
+  const savedThreats = await getSavedThreats(); //fetch fetch saved CVEs from database
 
   // Count critical and high using both CVSS versions
   const critical = vulnerabilities.filter((v: any) => {
@@ -95,6 +106,31 @@ export default async function Dashboard() {
           );
         })}
       </div>
+
+      {/* Saved CVEs from database */}
+<div className="mt-10">
+  <h2 className="text-xl font-bold text-white mb-4">
+    Saved CVEs ({savedThreats.length})
+  </h2>
+  <div className="flex flex-col gap-3">
+    {savedThreats.map((t: any) => (
+      <div key={t.id}
+        className="bg-[#0E1117] border border-[#10B981]/30 rounded-xl p-4 flex items-center justify-between">
+        
+        {/* Left — CVE info */}
+        <div>
+          <div className="font-mono text-[#10B981] text-sm">{t.cveId}</div>
+          <div className="text-gray-500 text-xs mt-1">{t.vendor} · {t.patched ? '✓ Patched' : '⚠ Unpatched'}</div>
+        </div>
+
+        {/* Right — score badge */}
+        <div className="px-3 py-1 rounded-full text-xs font-bold bg-[#10B981]/10 border border-[#10B981]/30 text-[#10B981]">
+          {t.score} {t.severity}
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
 
     </main>
   );

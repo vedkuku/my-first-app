@@ -34,11 +34,38 @@ const severityColors = {
 
     //Controls wheather the details panel is visible or hidden
     const [expanded, setExpanded] = useState(false);
+    const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
 
 
    // Track patched status locally - starting value with whatever comes from parent 
      const [patchedStatus, setPatchedStatus] = useState(cveData.patched);
    
+
+  // Saves this CVE to the daabse via POST /api/saved-theats
+  async function handleSave() {
+    setSaveStatus('saving');
+  
+    try {
+      const response = await fetch('/api/saved-threats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cveId:       cveData.id,          // id lives inside cveData
+          score:       cveData.score,       // score lives inside cveData
+          severity:    cveData.severity,    // severity lives inside cveData
+          vendor:      cveData.vendor,      // vendor lives inside cveData
+          description: cveData.id,          // no description prop yet — use id as placeholder
+        }),
+      });
+  
+      if (!response.ok) throw new Error('Save failed');
+      setSaveStatus('saved');
+  
+    } catch (error) {
+      setSaveStatus('error');
+    }
+  }
    return (
         <div style={{
             background: '#0E1117',
@@ -125,8 +152,28 @@ const severityColors = {
               >
                 {patchedStatus ? '✓ Mark as Unpatched' : '⚡ Mark as Patched'}
               </button>
+
+              
             </div>
           )}
+
+<button
+  onClick={handleSave}
+  disabled={saveStatus === 'saving' || saveStatus === 'saved'}
+  className={`mt-2 px-3 py-1 rounded text-xs font-semibold transition-colors ${
+    saveStatus === 'saved'  ? 'bg-green-700 text-green-100' :
+    saveStatus === 'error'  ? 'bg-red-700 text-red-100' :
+    saveStatus === 'saving' ? 'bg-gray-600 text-gray-300' :
+    'bg-blue-700 text-white hover:bg-blue-600'
+  }`}
+>
+  {saveStatus === 'saved'  ? 'Saved ✓' :
+   saveStatus === 'error'  ? 'Failed — retry' :
+   saveStatus === 'saving' ? 'Saving...' :
+   'Save CVE'}
+</button>
         </div>
+
+        
       );
     }
