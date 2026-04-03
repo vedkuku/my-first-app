@@ -2,7 +2,11 @@
 //It fetches data on server and send readymade html to browser
 //Notice: no useState, no useEffect - server components can fetch directly
 
+import { prisma } from '../../lib/prisma'; //read saved threats directly from DB 
+
 import Link from 'next/link';
+//import { auth } from '@clerk/nextjs/server';
+import { UserButton } from '@clerk/nextjs';
 
 async function getThreats(keyword: string) {
   const response = await fetch(
@@ -13,17 +17,16 @@ async function getThreats(keyword: string) {
   return data.vulnerabilities || [];
 }
 
-// Fetches CVEs saved by the user from our database
+// Reads saved CVEs directly from database — no API call needed in Server Components
 async function getSavedThreats() {
-  const response = await fetch(`http://localhost:3000/api/saved-threats`, {
-    cache: 'no-store', //always fetch fresh - dont cache savd threats
-
+  return await prisma.threat.findMany({
+    orderBy: { createdAt: 'desc' }, // newest first
   });
-  const data = await response.json();
-  return data;
 }
 
 export default async function Dashboard() {
+ // const { userId } = await auth();
+ // console.log('Current userId:', userId); 
   const vulnerabilities = await getThreats('fortinet');
   const savedThreats = await getSavedThreats(); //fetch fetch saved CVEs from database
 
@@ -48,12 +51,16 @@ export default async function Dashboard() {
         <h1 className="text-3xl font-bold text-white">
           Security Dashboard
         </h1>
+        <div className="flex items-center gap-4">
+        <UserButton />  {/* shows avatar, click to sign out */}   
+
         <Link href="/"
           className="text-indigo-400 text-sm hover:text-indigo-300 transition-colors">
           ← Back to Search
         </Link>
+        </div>
       </div>
-
+       
       {/* Stat cards */}
       <div className="grid grid-cols-3 gap-3 mb-8">
         {[
