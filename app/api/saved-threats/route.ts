@@ -62,7 +62,7 @@ export async function POST(request: Request) {
        return NextResponse.json(saved, { status: 201 });
 
     } catch (error: any) {
-        console.log('POST error:', error.message);
+       // console.log('POST error:', error.message);
         return NextResponse.json(
             { error: error.message},
             { status: 500 }
